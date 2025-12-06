@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <title>L1triangle_store – Produits & Panier</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<header class="topbar">
+    <div class="logo-area">
+        <span class="logo-icon">▲</span>
+        <span class="logo-text">L1 TRIANGLE</span>
+    </div>
+    <nav class="nav-links">
+        <a href="start.html">Accueil</a>
+        <a href="index.html">Produits</a>
+        <a href="#contact">Contact</a>
+    </nav>
+    <button id="open-cart" class="cart-button">
+        Panier <span id="cart-count">0</span>
+    </button>
+</header>
+
+<main class="product-wrapper">
+    <div class="product-tabs">
+        <a href="#manettes" class="product-tab">Manettes</a>
+        <a href="#accessoires" class="product-tab">Accessoires</a>
+        <a href="#moniteurs" class="product-tab">Moniteurs</a>
+        <a href="#airpods" class="product-tab">AirPods</a>
+        <a href="#cables" class="product-tab">Cables & chargeurs</a>
+        <a href="#vape" class="product-tab">Vape</a>
+    </div>
+
+    <section id="manettes" class="product-section">
+        <h2>Manettes</h2>
+        <p class="product-intro">Manettes ergonomiques, sans fil ou filaires, pour PC et consoles.</p>
+        <div class="product-grid">
+            <!-- Produits chargés dynamiquement depuis l'API -->
+        </div>
+    </section>
+
+    <section id="accessoires" class="product-section">
+        <h2>Accessoires</h2>
+        <p class="product-intro">Casques, claviers, souris et autres accessoires gaming.</p>
+        <div class="product-grid">
+            <!-- Produits chargés dynamiquement depuis l'API -->
+        </div>
+    </section>
+
+    <section id="moniteurs" class="product-section">
+        <h2>Moniteurs</h2>
+        <p class="product-intro">Écrans gaming haute performance pour une expérience immersive.</p>
+        <div class="product-grid">
+            <!-- Produits chargés dynamiquement depuis l'API -->
+        </div>
+    </section>
+
+    <section id="airpods" class="product-section">
+        <h2>AirPods</h2>
+        <p class="product-intro">Écouteurs sans fil premium avec son de qualité supérieure.</p>
+        <div class="product-grid">
+            <!-- Produits chargés dynamiquement depuis l'API -->
+        </div>
+    </section>
+
+    <section id="cables" class="product-section">
+        <h2>Cables & chargeurs</h2>
+        <p class="product-intro">Câbles et chargeurs rapides pour tous vos appareils.</p>
+        <div class="product-grid">
+            <!-- Produits chargés dynamiquement depuis l'API -->
+        </div>
+    </section>
+
+    <section id="vape" class="product-section">
+        <h2>Vapes</h2>
+        <p class="product-intro">Cigarettes électroniques et accessoires vape premium.</p>
+        <div class="product-grid">
+            <!-- Produits chargés dynamiquement depuis l'API -->
+        </div>
+    </section>
+</main>
+
+<!-- PANEL PANIER -->
+<div id="cart-overlay" class="cart-overlay hidden">
+    <div class="cart-panel">
+        <div class="cart-header">
+            <h2>Panier</h2>
+            <button id="close-cart" class="cart-close">Fermer ✕</button>
+        </div>
+
+        <div id="cart-items" class="cart-items"></div>
+
+        <div class="cart-footer">
+            <div class="cart-total-line">
+                Total : <span id="cart-total">0.00</span> $
+            </div>
+            <div class="cart-actions">
+                <button id="cart-email" class="cart-action-btn">Email</button>
+                <button id="cart-whatsapp" class="cart-action-btn cart-action-wp">WhatsApp</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<footer class="footer">
+    <div class="footer-container">
+        <div class="footer-section">
+            <h3>▲ L1 TRIANGLE</h3>
+            <p>Gaming gear & Vape - Local delivery</p>
+            <p>Technologie & Lifestyle authentiques</p>
+        </div>
+
+        <div class="footer-section">
+            <h3>Contact</h3>
+            <p>📧 l1triangle.info@gmail.com</p>
+            <p>📱 WhatsApp: +509 39 94 57 94</p>
+            <p>☎️ Tel: +509 39 94 57 94</p>
+        </div>
+
+        <div class="footer-section">
+            <h3>Réseaux sociaux</h3>
+            <div class="social-links">
+                <a href="#" class="social-link">Facebook</a>
+                <a href="#" class="social-link">Instagram</a>
+                <a href="#" class="social-link">Twitter</a>
+            </div>
+        </div>
+
+        <div class="footer-section">
+            <h3>Adresse</h3>
+            <p>📍 Morne Hercule, Petion-Ville</p>
+            <p>Port-au-Prince, Haïti</p>
+            <p>🕐 Lun - Sam : 9h - 18h</p>
+        </div>
+    </div>
+    
+    <div class="footer-bottom">
+        <p>© <span id="year">2025</span> L1triangle_store — Tous droits réservés.</p>
+    </div>
+</footer>
+
+<!-- Admin Icon -->
+<a href="admin-login.html" class="admin-icon" title="Administration">
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M12 2L2 7l10 5 10-5-10-5z"/>
+        <path d="M2 17l10 5 10-5M2 12l10 5 10-5"/>
+    </svg>
+</a>
+
+<!-- Configuration API -->
+<script src="config.js"></script>
+<!-- Lien vers le JS avec API -->
+<script src="panier-api.js"></script>
+<script>document.getElementById('year').textContent = new Date().getFullYear();</script>
+</body>
+</html>

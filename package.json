@@ -1,0 +1,27 @@
+{
+  "name": "l1triangle-api",
+  "version": "1.0.0",
+  "description": "API pour L1triangle_store - Gestion des produits et commandes",
+  "main": "api-server.js",
+  "scripts": {
+    "start": "node api-server.js",
+    "dev": "nodemon api-server.js"
+  },
+  "keywords": [
+    "api",
+    "ecommerce",
+    "l1triangle"
+  ],
+  "author": "L1triangle_store",
+  "license": "ISC",
+  "dependencies": {
+    "body-parser": "^1.20.2",
+    "cors": "^2.8.5",
+    "express": "^4.18.2",
+    "uuid": "^9.0.1"
+  },
+  "devDependencies": {
+    "mkcert": "^3.2.0",
+    "nodemon": "^3.0.1"
+  }
+}

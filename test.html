@@ -1,0 +1,356 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <title>L1triangle_store – Test Panier</title>
+    <link rel="stylesheet" href="produits.html">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        /* ========== CSS ========== */
+        *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+        html{scroll-behavior:smooth}
+        body{
+            font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+            background:#050608;color:#f5f5f5;line-height:1.6;
+        }
+        .topbar{
+            position:sticky;top:0;z-index:30;
+            display:flex;align-items:center;justify-content:space-between;
+            padding:12px 7%;background:rgba(5,6,8,.98);
+            border-bottom:1px solid rgba(255,255,255,.05);
+        }
+        .logo-area{display:flex;align-items:center;gap:8px;color:#ff6b3d;
+            font-weight:700;letter-spacing:.08em;text-transform:uppercase;font-size:13px}
+        .logo-icon{border-radius:8px;border:2px solid #ff6b3d;padding:2px 6px;font-size:12px}
+        .nav-links{display:flex;gap:18px;font-size:14px}
+        .nav-links a{color:#f5f5f5;text-decoration:none;opacity:.85;transition:opacity .2s}
+        .nav-links a:hover{opacity:1}
+        .cart-button{
+            border:none;border-radius:999px;padding:8px 14px;
+            background:#ff6b3d;color:#050608;font-weight:600;font-size:13px;
+            cursor:pointer;box-shadow:0 8px 20px rgba(255,107,61,.4);
+        }
+        #cart-count{
+            background:#050608;color:#ff6b3d;padding:2px 6px;border-radius:999px;
+            margin-left:4px;font-size:11px;
+        }
+
+        .product-section{padding:40px 7% 50px}
+        .product-section h1{font-size:24px;color:#ff6b3d;margin-bottom:10px}
+        .product-intro{font-size:14px;opacity:.85;margin-bottom:24px}
+        .product-grid{
+            display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:22px;
+        }
+        .product-card{
+            background:radial-gradient(circle at top left,rgba(255,107,61,.18),transparent 60%),
+                       rgba(255,255,255,.03);
+            border-radius:18px;padding:16px 14px 18px;
+            box-shadow:0 14px 36px rgba(0,0,0,.55);
+            border:1px solid rgba(255,255,255,.05);
+            display:flex;flex-direction:column;gap:8px;
+        }
+        .product-card img{
+            width:100%;height:150px;object-fit:cover;border-radius:12px;
+        }
+        .product-card h3{font-size:15px;color:#ffb197}
+        .product-card p{font-size:13px;opacity:.9}
+        .price{font-weight:700;font-size:15px;color:#ff6b3d}
+        .product-btn{
+            margin-top:8px;display:inline-block;padding:8px 17px;border-radius:999px;
+            background:linear-gradient(180deg,#ffb088,#ff6b3d);
+            color:#050608;font-size:13px;font-weight:700;text-decoration:none;
+            border:none;cursor:pointer;box-shadow:0 10px 25px rgba(255,107,61,.35);
+            transition:all .2s;
+        }
+        .product-btn:hover{transform:translateY(-2px) scale(1.03);
+            box-shadow:0 15px 35px rgba(255,107,61,.45)}
+        .product-btn:active{transform:scale(.97)}
+        /* ---- overlay & panel ---- */
+        .cart-overlay{
+            position:fixed;inset:0;background:rgba(0,0,0,.55);
+            backdrop-filter:blur(6px);
+            display:flex;justify-content:flex-end;z-index:50;
+        }
+        .cart-overlay.hidden{display:none}
+        .cart-panel{
+            width:360px;max-width:100%;height:100%;background:#050608;
+            border-left:1px solid rgba(255,255,255,.08);
+            box-shadow:-20px 0 40px rgba(0,0,0,.7);
+            display:flex;flex-direction:column;
+        }
+        .cart-header{
+            padding:16px 18px;border-bottom:1px solid rgba(255,255,255,.08);
+            display:flex;justify-content:space-between;align-items:center;
+        }
+        .cart-header h2{font-size:20px;color:#ff6b3d}
+        .cart-close{
+            border:none;background:transparent;color:#f5f5f5;
+            font-size:13px;cursor:pointer;opacity:.8;
+        }
+        .cart-close:hover{opacity:1}
+        .cart-items{
+            padding:16px 16px 12px;overflow-y:auto;flex:1;
+        }
+        .cart-item{
+            display:grid;grid-template-columns:auto 1fr auto;
+            gap:8px;margin-bottom:14px;padding-bottom:10px;
+            border-bottom:1px solid rgba(255,255,255,.05);
+        }
+        .cart-item-img{
+            width:48px;height:48px;border-radius:8px;object-fit:cover;
+        }
+        .cart-item-info h4{font-size:14px;margin-bottom:2px}
+        .cart-item-info span{font-size:12px;opacity:.85}
+        .cart-item-controls{
+            display:flex;flex-direction:column;align-items:flex-end;
+            gap:4px;font-size:12px;
+        }
+        .qty-controls{display:flex;align-items:center;gap:4px}
+        .qty-btn{
+            width:20px;height:20px;border-radius:999px;
+            border:1px solid rgba(255,255,255,.3);
+            background:transparent;color:#f5f5f5;cursor:pointer;font-size:12px;
+        }
+        .cart-item-qty{min-width:18px;text-align:center}
+        .remove-item{
+            border:none;background:transparent;color:#ff7676;
+            cursor:pointer;font-size:11px;
+        }
+        .cart-footer{
+            padding:14px 16px 18px;border-top:1px solid rgba(255,255,255,.08);
+        }
+        .cart-total-line{font-size:15px;font-weight:700;margin-bottom:12px}
+        .cart-actions{display:flex;gap:10px}
+        .cart-action-btn{
+            flex:1;padding:9px 0;border-radius:999px;border:none;cursor:pointer;
+            font-size:13px;font-weight:600;
+            background:rgba(255,255,255,.06);color:#f5f5f5;
+        }
+        .cart-action-wp{background:#25d366;color:#050608}
+        .cart-action-btn:hover{opacity:.9}
+
+        @media(max-width:600px){
+            .topbar{flex-wrap:wrap;gap:8px}
+        }
+    </style>
+</head>
+<body>
+
+<header class="topbar">
+    <div class="logo-area">
+        <span class="logo-icon">▲</span>
+        <span class="logo-text">L1 TRIANGLE</span>
+    </div>
+    <nav class="nav-links">
+        <a href="#produits">Produits</a>
+    </nav>
+    <button id="open-cart" class="cart-button">
+        Panier <span id="cart-count">0</span>
+    </button>
+</header>
+
+<main>
+    <section id="produits" class="product-section">
+        <h1>Nos produits</h1>
+        <p class="product-intro">Clique sur "Ajouter au panier" pour tester.</p>
+
+        <div class="product-grid">
+            <article class="product-card"
+                     data-id="p1"
+                     data-name="Manette sans fil Pro"
+                     data-price="65"
+                     data-image="https://via.placeholder.com/300x200?text=Manette">
+                <img src="https://via.placeholder.com/300x200?text=Manette" alt="">
+                <h3>Manette sans fil Pro</h3>
+                <p>Connexion Bluetooth, autonomie 20h.</p>
+                <span class="price">65 $</span>
+                <button class="product-btn add-to-cart">Ajouter au panier</button>
+            </article>
+
+            <article class="product-card"
+                     data-id="p2"
+                     data-name="Casque gaming 7.1"
+                     data-price="44.9"
+                     data-image="https://via.placeholder.com/300x200?text=Casque">
+                <img src="https://via.placeholder.com/300x200?text=Casque" alt="">
+                <h3>Casque gaming 7.1</h3>
+                <p>Son surround, micro rétractable.</p>
+                <span class="price">44.90 $</span>
+                <button class="product-btn add-to-cart">Ajouter au panier</button>
+            </article>
+
+            <article class="product-card"
+                     data-id="p3"
+                     data-name="Vape jetable 6000 puffs"
+                     data-price="24.5"
+                     data-image="https://via.placeholder.com/300x200?text=Vape">
+                <img src="https://via.placeholder.com/300x200?text=Vape" alt="">
+                <h3>Vape jetable 6000 puffs</h3>
+                <p>Nombreux arômes disponibles.</p>
+                <span class="price">24.50 $</span>
+                <button class="product-btn add-to-cart">Ajouter au panier</button>
+            </article>
+        </div>
+    </section>
+</main>
+
+<!-- PANEL PANIER -->
+<div id="cart-overlay" class="cart-overlay hidden">
+    <div class="cart-panel">
+        <div class="cart-header">
+            <h2>Panier</h2>
+            <button id="close-cart" class="cart-close">Fermer ✕</button>
+        </div>
+
+        <div id="cart-items" class="cart-items"></div>
+
+        <div class="cart-footer">
+            <div class="cart-total-line">
+                Total : <span id="cart-total">0.00</span> $
+            </div>
+            <div class="cart-actions">
+                <button id="cart-email" class="cart-action-btn">Email</button>
+                <button id="cart-whatsapp" class="cart-action-btn cart-action-wp">WhatsApp</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // ========== JS DU PANIER ==========
+    const cart = [];
+
+    const cartCountEl  = document.getElementById('cart-count');
+    const cartOverlay  = document.getElementById('cart-overlay');
+    const cartItemsEl  = document.getElementById('cart-items');
+    const cartTotalEl  = document.getElementById('cart-total');
+    const openCartBtn  = document.getElementById('open-cart');
+    const closeCartBtn = document.getElementById('close-cart');
+    const emailBtn     = document.getElementById('cart-email');
+    const whatsappBtn  = document.getElementById('cart-whatsapp');
+
+    // Sécurité : si un élément manque, on évite le crash
+    if (openCartBtn && cartOverlay) {
+        openCartBtn.addEventListener('click', () => {
+            cartOverlay.classList.remove('hidden');
+        });
+    }
+    if (closeCartBtn && cartOverlay) {
+        closeCartBtn.addEventListener('click', () => {
+            cartOverlay.classList.add('hidden');
+        });
+        cartOverlay.addEventListener('click', e => {
+            if (e.target === cartOverlay) cartOverlay.classList.add('hidden');
+        });
+    }
+
+    // Ajouter au panier
+    document.querySelectorAll('.add-to-cart').forEach(btn => {
+        btn.addEventListener('click', () => {
+            const card  = btn.closest('.product-card');
+            const id    = card.dataset.id;
+            const name  = card.dataset.name;
+            const price = parseFloat(card.dataset.price);
+            const image = card.dataset.image || card.querySelector('img').src;
+
+            if (!id || !name || isNaN(price)) {
+                console.error('Données manquantes sur un produit');
+                return;
+            }
+
+            const existing = cart.find(it => it.id === id);
+            if (existing) {
+                existing.qty += 1;
+            } else {
+                cart.push({ id, name, price, qty: 1, image });
+            }
+            renderCart();
+            cartOverlay.classList.remove('hidden'); // ouvrir le panneau automatiquement
+        });
+    });
+
+    function renderCart() {
+        cartItemsEl.innerHTML = '';
+        let total = 0;
+        let totalQty = 0;
+
+        cart.forEach(item => {
+            const sub = item.price * item.qty;
+            total += sub;
+            totalQty += item.qty;
+
+            const div = document.createElement('div');
+            div.className = 'cart-item';
+            div.innerHTML = `
+                <img src="${item.image}" class="cart-item-img" alt="">
+                <div class="cart-item-info">
+                    <h4>${item.name}</h4>
+                    <span>Prix unité: ${item.price.toFixed(2)} $</span>
+                </div>
+                <div class="cart-item-controls">
+                    <div class="qty-controls">
+                        <button class="qty-btn minus">-</button>
+                        <span class="cart-item-qty">${item.qty}</span>
+                        <button class="qty-btn plus">+</button>
+                    </div>
+                    <div>${sub.toFixed(2)} $</div>
+                    <button class="remove-item">Supprimer</button>
+                </div>
+            `;
+
+            const minus = div.querySelector('.minus');
+            const plus  = div.querySelector('.plus');
+            const rem   = div.querySelector('.remove-item');
+
+            minus.addEventListener('click', () => {
+                if (item.qty > 1) item.qty--; else cart.splice(cart.indexOf(item),1);
+                renderCart();
+            });
+            plus.addEventListener('click', () => { item.qty++; renderCart(); });
+            rem.addEventListener('click', () => {
+                cart.splice(cart.indexOf(item),1);
+                renderCart();
+            });
+
+            cartItemsEl.appendChild(div);
+        });
+
+        cartTotalEl.textContent = total.toFixed(2);
+        cartCountEl.textContent = totalQty;
+    }
+
+    function buildOrderText() {
+        if (!cart.length) return '';
+        let total = cart.reduce((s,i)=>s+i.price*i.qty,0);
+        let lines = ['Commande L1triangle_store',''];
+        cart.forEach(i=>{
+            lines.push(`- ${i.name} x${i.qty} : ${i.price.toFixed(2)} $ (sous-total ${(i.price*i.qty).toFixed(2)} $)`);
+        });
+        lines.push('');
+        lines.push(`Total : ${total.toFixed(2)} $`);
+        return lines.join('\n');
+    }
+
+    if (emailBtn) {
+        emailBtn.addEventListener('click', () => {
+            if (!cart.length) { alert('Votre panier est vide.'); return; }
+            const email   = 'contact@l1triangle.com'; // change ici
+            const subject = 'Commande L1triangle_store';
+            const body    = buildOrderText();
+            window.location.href =
+                `mailto:${email}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+        });
+    }
+
+    if (whatsappBtn) {
+        whatsappBtn.addEventListener('click', () => {
+            if (!cart.length) { alert('Votre panier est vide.'); return; }
+            const phone   = '50900000000'; // ton numéro sans +
+            const message = buildOrderText();
+            const url     = `https://wa.me/${phone}?text=${encodeURIComponent(message)}`;
+            window.open(url,'_blank');
+        });
+    }
+</script>
+</body>
+</html>

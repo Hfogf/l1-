@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <title>Dashboard Admin - L1triangle_store</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="admin-style.css">
+</head>
+<body>
+    <div class="admin-container">
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <h2>▲ L1 TRIANGLE</h2>
+                <div class="admin-info">
+                    <span id="adminName">Admin</span>
+                </div>
+            </div>
+
+            <nav class="sidebar-menu">
+                <button class="menu-item active" data-section="dashboard">
+                    📊 Tableau de bord
+                </button>
+                <button class="menu-item" data-section="products">
+                    📦 Produits
+                </button>
+                <button class="menu-item" data-section="orders">
+                    🛒 Commandes
+                </button>
+                <button class="menu-item" data-section="logs">
+                    📝 Historique
+                </button>
+            </nav>
+
+            <button class="logout-btn" id="logoutBtn">
+                🚪 Se déconnecter
+            </button>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- Dashboard Section -->
+            <section id="dashboard-section" class="content-section">
+                <div class="content-header">
+                    <h1>Tableau de bord</h1>
+                    <p>Vue d'ensemble de votre boutique</p>
+                    <div class="auto-sync-control" style="margin-top: 10px;">
+                        <label>
+                            <input type="checkbox" id="autoSyncToggle"> 
+                            🔄 Sync automatique chaque 5 secondes
+                        </label>
+                    </div>
+                </div>
+
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <h3>Produits</h3>
+                        <div class="stat-value" id="totalProducts">0</div>
+                    </div>
+                    <div class="stat-card">
+                        <h3>Commandes</h3>
+                        <div class="stat-value" id="totalOrders">0</div>
+                    </div>
+                    <div class="stat-card">
+                        <h3>Modifications</h3>
+                        <div class="stat-value" id="totalLogs">0</div>
+                    </div>
+                </div>
+
+                <div class="section-card">
+                    <h2>Dernières commandes</h2>
+                    <div id="recentOrders"></div>
+                </div>
+            </section>
+
+            <!-- Products Section -->
+            <section id="products-section" class="content-section hidden">
+                <div class="content-header">
+                    <h1>Gestion des produits</h1>
+                    <p>Ajouter, modifier ou supprimer des produits</p>
+                </div>
+
+                <div class="action-buttons">
+                    <button class="btn btn-primary" id="addProductBtn">
+                        ➕ Nouveau produit
+                    </button>
+                    <button class="btn btn-secondary" id="refreshProductsBtn">
+                        🔄 Actualiser
+                    </button>
+                </div>
+
+                <div class="section-card">
+                    <div id="productsTableContainer"></div>
+                </div>
+            </section>
+
+            <!-- Orders Section -->
+            <section id="orders-section" class="content-section hidden">
+                <div class="content-header">
+                    <h1>Gestion des commandes</h1>
+                    <p>Visualiser et gérer les commandes clients</p>
+                </div>
+
+                <div class="action-buttons">
+                    <button class="btn btn-secondary" id="refreshOrdersBtn">
+                        🔄 Actualiser
+                    </button>
+                </div>
+
+                <div class="section-card">
+                    <div id="ordersTableContainer"></div>
+                </div>
+            </section>
+
+            <!-- Logs Section -->
+            <section id="logs-section" class="content-section hidden">
+                <div class="content-header">
+                    <h1>Historique des modifications</h1>
+                    <p>Toutes les actions effectuées par l'admin</p>
+                </div>
+
+                <div class="action-buttons">
+                    <button class="btn btn-secondary" id="refreshLogsBtn">
+                        🔄 Actualiser
+                    </button>
+                    <button class="btn btn-danger" id="clearLogsBtn">
+                        🗑️ Effacer l'historique
+                    </button>
+                </div>
+
+                <div class="section-card">
+                    <div id="logsTableContainer"></div>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <!-- Modal pour ajouter/modifier un produit -->
+    <div id="productModal" class="modal-overlay hidden">
+        <div class="modal">
+            <div class="modal-header">
+                <h2 id="modalTitle">Nouveau produit</h2>
+                <button class="modal-close" id="closeModalBtn">×</button>
+            </div>
+
+            <form id="productForm">
+                <input type="hidden" id="productId">
+                
+                <div class="form-row">
+                    <div class="form-field">
+                        <label for="productName">Nom du produit *</label>
+                        <input type="text" id="productName" required>
+                    </div>
+                    <div class="form-field">
+                        <label for="productCategory">Catégorie *</label>
+                        <select id="productCategory" required>
+                            <option value="">Sélectionner...</option>
+                            <option value="manettes">Manettes</option>
+                            <option value="moniteurs">Moniteurs</option>
+                            <option value="accessoires">Accessoires</option>
+                            <option value="airpods">AirPods</option>
+                            <option value="cables">Câbles & Chargeurs</option>
+                            <option value="vape">Vape</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-field">
+                        <label for="productPrice">Prix (HTG) *</label>
+                        <input type="number" id="productPrice" min="0" step="0.01" required>
+                    </div>
+                    <div class="form-field">
+                        <label for="productStock">Stock</label>
+                        <input type="number" id="productStock" min="0" value="0">
+                    </div>
+                </div>
+
+                <div class="form-field">
+                    <label for="productDescription">Description</label>
+                    <textarea id="productDescription" rows="3"></textarea>
+                </div>
+
+                <div class="form-field">
+                    <label for="productImage">URL de l'image</label>
+                    <input type="text" id="productImage" placeholder="https://...">
+                </div>
+
+                <div class="modal-actions">
+                    <button type="submit" class="btn btn-primary">
+                        💾 Enregistrer
+                    </button>
+                    <button type="button" class="btn btn-secondary" id="cancelModalBtn">
+                        Annuler
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script src="config.js"></script>
+    <script src="admin-dashboard.js"></script>
+</body>
+</html>

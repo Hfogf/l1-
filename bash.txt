@@ -1,0 +1,87 @@
+==============================================
+ COMMANDES UTILES - L1TRIANGLE STORE
+==============================================
+
+--- DÉMARRAGE ---
+
+# Démarrer le serveur API
+node api-server.js
+
+# Démarrer avec npm
+npm start
+
+# Mode développement (rechargement auto)
+npm run dev
+
+
+--- INSTALLATION ---
+
+# Installer les dépendances
+npm install
+
+# Installer une dépendance spécifique
+npm install express
+npm install cors
+npm install uuid
+
+
+--- BASE DE DONNÉES ---
+
+# Ajouter des produits de démonstration
+node add-demo-products.js
+
+# Sauvegarder la base de données
+copy database.json database-backup.json
+
+# Restaurer la base de données
+copy database-backup.json database.json
+
+
+--- VÉRIFICATIONS ---
+
+# Vérifier si Node.js est installé
+node --version
+
+# Vérifier si npm est installé
+npm --version
+
+# Voir les processus sur le port 3000
+netstat -ano | findstr :3000
+
+# Tuer un processus (remplacer PID)
+taskkill /PID 1234 /F
+
+
+--- RÉSEAU ---
+
+# Voir votre adresse IP
+ipconfig
+
+# Tester si le serveur répond
+curl http://localhost:3000/api/products
+
+
+--- URLS IMPORTANTES ---
+
+Admin Panel:     http://localhost:3000/admin-login.html
+Boutique:        http://localhost:3000/index.html
+Accueil:         http://localhost:3000/start.html
+API Products:    http://localhost:3000/api/products
+API Orders:      http://localhost:3000/api/orders
+API Logs:        http://localhost:3000/api/logs
+API Stats:       http://localhost:3000/api/stats
+
+
+--- CODE ADMIN ---
+
+Code de sécurité: L1_TRIANGLE
+
+
+--- CONTACTS ---
+
+WhatsApp: +509 39 94 59 94
+Email:    l1triangle.info@gmail.com
+
+==============================================
+ © 2025 L1triangle_store
+==============================================
