@@ -4,37 +4,13 @@
     <meta charset="UTF-8">
     <title>Admin - L1triangle_store</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="admin-style.css">
 </head>
-<body>
-    <div class="login-container">
-        <div class="login-box">
-            <div class="logo-section">
-                <span class="logo-icon">▲</span>
-                <h1>L1 TRIANGLE</h1>
-                <p>Panneau d'administration</p>
-            </div>
-
-            <form id="loginForm" class="login-form">
-                <div class="form-group">
-                    <label for="username">Nom d'utilisateur</label>
-                    <input type="text" id="username" name="username" required autocomplete="username">
-                </div>
-
-                <div class="form-group">
-                    <label for="password">Code de sécurité</label>
-                    <input type="password" id="password" name="password" required autocomplete="current-password">
-                </div>
-
-                <div id="error-message" class="error-message hidden"></div>
-
-                <button type="submit" class="login-btn">Se connecter</button>
-            </form>
-
-            <a href="start.html" class="back-link">← Retour au site</a>
-        </div>
-    </div>
-
-    <script src="admin-auth.js"></script>
+<body style="margin: 0; padding: 0; font-family: Arial, sans-serif;">
+    <!-- Charge la config API d'abord -->
+    <script src="config.js"></script>
+    <!-- Charge le client API robuste -->
+    <script src="panier-api-v2.js"></script>
+    <!-- Charge le dashboard admin -->
+    <script src="admin-dashboard-v2.js"></script>
 </body>
 </html>

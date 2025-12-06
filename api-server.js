@@ -41,6 +41,17 @@ app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(express.static('.')); // Servir les fichiers statiques
 
+// Logging middleware
+app.use((req, res, next) => {
+    console.log(`\n${'='.repeat(70)}`);
+    console.log(`📨 ${req.method} ${req.path}`);
+    console.log(`Origin: ${req.headers.origin || 'N/A'}`);
+    if (req.body && Object.keys(req.body).length > 0) {
+        console.log(`Body: ${JSON.stringify(req.body).substring(0, 100)}`);
+    }
+    next();
+});
+
 // Fonction pour obtenir l'adresse IP locale
 function getLocalIPAddress() {
     const interfaces = os.networkInterfaces();
@@ -108,12 +119,36 @@ async function logAction(action, details, admin = 'Admin') {
     await writeDatabase(db);
 }
 
+// ==================== ROUTE HEALTH CHECK ====================
+
+app.get('/health', (req, res) => {
+    res.json({ 
+        status: 'OK', 
+        timestamp: new Date().toISOString(),
+        message: '✅ Serveur API actif'
+    });
+});
+
+app.get('/api/health', (req, res) => {
+    res.json({ 
+        status: 'OK', 
+        timestamp: new Date().toISOString(),
+        message: '✅ API v1 active'
+    });
+});
+
 // ==================== ROUTES PRODUITS ====================
 
 // Obtenir tous les produits
 app.get('/api/products', async (req, res) => {
-    const db = await readDatabase();
-    res.json(db.products);
+    try {
+        const db = await readDatabase();
+        console.log(`✅ ${db.products.length} produits retournés`);
+        res.json(db.products);
+    } catch (error) {
+        console.error('❌ Erreur GET /api/products:', error);
+        res.status(500).json({ error: 'Erreur serveur' });
+    }
 });
 
 // Obtenir un produit par ID
@@ -129,50 +164,68 @@ app.get('/api/products/:id', async (req, res) => {
 
 // Créer un nouveau produit
 app.post('/api/products', async (req, res) => {
-    const db = await readDatabase();
-    const newProduct = {
-        id: uuidv4(),
-        ...req.body,
-        createdAt: new Date().toISOString()
-    };
-    db.products.push(newProduct);
-    await writeDatabase(db);
-    await logAction('AJOUT_PRODUIT', `Produit ajouté: ${newProduct.name}`);
-    res.status(201).json(newProduct);
+    try {
+        const db = await readDatabase();
+        const newProduct = {
+            id: uuidv4(),
+            ...req.body,
+            createdAt: new Date().toISOString()
+        };
+        db.products.push(newProduct);
+        await writeDatabase(db);
+        await logAction('AJOUT_PRODUIT', `Produit ajouté: ${newProduct.name}`);
+        console.log(`✅ Produit créé: ${newProduct.id}`);
+        res.status(201).json(newProduct);
+    } catch (error) {
+        console.error('❌ Erreur POST /api/products:', error);
+        res.status(500).json({ error: 'Erreur serveur' });
+    }
 });
 
 // Modifier un produit
 app.put('/api/products/:id', async (req, res) => {
-    const db = await readDatabase();
-    const index = db.products.findIndex(p => p.id === req.params.id);
-    
-    if (index !== -1) {
-        const updatedProduct = {
-            ...db.products[index],
-            ...req.body,
-            updatedAt: new Date().toISOString()
-        };
-        db.products[index] = updatedProduct;
-        await writeDatabase(db);
-        await logAction('MODIFICATION_PRODUIT', `Produit modifié: ${updatedProduct.name}`);
-        res.json(updatedProduct);
-    } else {
-        res.status(404).json({ error: 'Produit non trouvé' });
+    try {
+        const db = await readDatabase();
+        const index = db.products.findIndex(p => p.id === req.params.id);
+        
+        if (index !== -1) {
+            const updatedProduct = {
+                ...db.products[index],
+                ...req.body,
+                updatedAt: new Date().toISOString()
+            };
+            db.products[index] = updatedProduct;
+            await writeDatabase(db);
+            await logAction('MODIFICATION_PRODUIT', `Produit modifié: ${updatedProduct.name}`);
+            console.log(`✅ Produit modifié: ${req.params.id}`);
+            res.json(updatedProduct);
+        } else {
+            res.status(404).json({ error: 'Produit non trouvé' });
+        }
+    } catch (error) {
+        console.error('❌ Erreur PUT /api/products:', error);
+        res.status(500).json({ error: 'Erreur serveur' });
     }
 });
 
 // Supprimer un produit
 app.delete('/api/products/:id', async (req, res) => {
-    const db = await readDatabase();
-    const product = db.products.find(p => p.id === req.params.id);
-    
-    if (product) {
-        db.products = db.products.filter(p => p.id !== req.params.id);
-        await writeDatabase(db);
-        await logAction('SUPPRESSION_PRODUIT', `Produit supprimé: ${product.name}`);
-        res.json({ message: 'Produit supprimé' });
-    } else {
-        res.status(404).json({ error: 'Produit non trouvé' });
+    try {
+        const db = await readDatabase();
+        const product = db.products.find(p => p.id === req.params.id);
+        
+        if (product) {
+            db.products = db.products.filter(p => p.id !== req.params.id);
+            await writeDatabase(db);
+            await logAction('SUPPRESSION_PRODUIT', `Produit supprimé: ${product.name}`);
+            console.log(`✅ Produit supprimé: ${req.params.id}`);
+            res.json({ message: 'Produit supprimé' });
+        } else {
+            res.status(404).json({ error: 'Produit non trouvé' });
+        }
+    } catch (error) {
+        console.error('❌ Erreur DELETE /api/products:', error);
+        res.status(500).json({ error: 'Erreur serveur' });
     }
 });
 
@@ -180,8 +233,14 @@ app.delete('/api/products/:id', async (req, res) => {
 
 // Obtenir toutes les commandes
 app.get('/api/orders', async (req, res) => {
-    const db = await readDatabase();
-    res.json(db.orders);
+    try {
+        const db = await readDatabase();
+        console.log(`✅ ${db.orders.length} commandes retournées`);
+        res.json(db.orders);
+    } catch (error) {
+        console.error('❌ Erreur GET /api/orders:', error);
+        res.status(500).json({ error: 'Erreur serveur' });
+    }
 });
 
 // Obtenir une commande par ID
@@ -197,30 +256,42 @@ app.get('/api/orders/:id', async (req, res) => {
 
 // Créer une nouvelle commande
 app.post('/api/orders', async (req, res) => {
-    const db = await readDatabase();
-    const newOrder = {
-        id: uuidv4(),
-        ...req.body,
-        date: new Date().toISOString()
-    };
-    db.orders.push(newOrder);
-    await writeDatabase(db);
-    await logAction('NOUVELLE_COMMANDE', `Commande de ${newOrder.customerName} - ${newOrder.total} HTG`, 'Système');
-    res.status(201).json(newOrder);
+    try {
+        const db = await readDatabase();
+        const newOrder = {
+            id: uuidv4(),
+            ...req.body,
+            date: new Date().toISOString()
+        };
+        db.orders.push(newOrder);
+        await writeDatabase(db);
+        await logAction('NOUVELLE_COMMANDE', `Commande de ${newOrder.customerName} - ${newOrder.total}`, 'Système');
+        console.log(`✅ Commande créée: ${newOrder.id}`);
+        res.status(201).json(newOrder);
+    } catch (error) {
+        console.error('❌ Erreur POST /api/orders:', error);
+        res.status(500).json({ error: 'Erreur serveur' });
+    }
 });
 
 // Supprimer une commande
 app.delete('/api/orders/:id', async (req, res) => {
-    const db = await readDatabase();
-    const order = db.orders.find(o => o.id === req.params.id);
-    
-    if (order) {
-        db.orders = db.orders.filter(o => o.id !== req.params.id);
-        await writeDatabase(db);
-        await logAction('SUPPRESSION_COMMANDE', `Commande supprimée: ${order.id}`);
-        res.json({ message: 'Commande supprimée' });
-    } else {
-        res.status(404).json({ error: 'Commande non trouvée' });
+    try {
+        const db = await readDatabase();
+        const order = db.orders.find(o => o.id === req.params.id);
+        
+        if (order) {
+            db.orders = db.orders.filter(o => o.id !== req.params.id);
+            await writeDatabase(db);
+            await logAction('SUPPRESSION_COMMANDE', `Commande supprimée: ${order.id}`);
+            console.log(`✅ Commande supprimée: ${req.params.id}`);
+            res.json({ message: 'Commande supprimée' });
+        } else {
+            res.status(404).json({ error: 'Commande non trouvée' });
+        }
+    } catch (error) {
+        console.error('❌ Erreur DELETE /api/orders:', error);
+        res.status(500).json({ error: 'Erreur serveur' });
     }
 });
 
