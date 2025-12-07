@@ -1,7 +1,7 @@
 const express = require('express');
 const cors = require('cors');
 const bodyParser = require('body-parser');
-const fs = require('fs').promises;
+const fs = require('fs');
 const path = require('path');
 const { v4: uuidv4 } = require('uuid');
 const os = require('os');
@@ -69,54 +69,65 @@ function getLocalIPAddress() {
 const DB_FILE = path.join(__dirname, 'database.json');
 
 // Initialiser la base de données
-async function initDatabase() {
+function initDatabase() {
     try {
-        await fs.access(DB_FILE);
-    } catch {
-        const initialData = {
-            products: [],
-            orders: [],
-            logs: []
-        };
-        await fs.writeFile(DB_FILE, JSON.stringify(initialData, null, 2));
-        console.log('✅ Base de données initialisée');
+        if (!fs.existsSync(DB_FILE)) {
+            const initialData = {
+                products: [],
+                orders: [],
+                logs: []
+            };
+            fs.writeFileSync(DB_FILE, JSON.stringify(initialData, null, 2));
+            console.log('✅ Base de données créée');
+        }
+    } catch (error) {
+        console.error('❌ Erreur init DB:', error.message);
     }
 }
 
 // Lire la base de données
-async function readDatabase() {
+function readDatabase() {
     try {
-        const data = await fs.readFile(DB_FILE, 'utf8');
-        return JSON.parse(data);
+        if (fs.existsSync(DB_FILE)) {
+            const data = fs.readFileSync(DB_FILE, 'utf8');
+            return JSON.parse(data);
+        }
     } catch (error) {
-        console.error('Erreur lecture DB:', error);
-        return { products: [], orders: [], logs: [] };
+        console.error('❌ Erreur lecture DB:', error.message);
     }
+    return { products: [], orders: [], logs: [] };
 }
 
 // Écrire dans la base de données
-async function writeDatabase(data) {
+function writeDatabase(data) {
     try {
-        await fs.writeFile(DB_FILE, JSON.stringify(data, null, 2));
+        fs.writeFileSync(DB_FILE, JSON.stringify(data, null, 2));
+        console.log('💾 Base de données sauvegardée');
         return true;
     } catch (error) {
-        console.error('Erreur écriture DB:', error);
+        console.error('❌ Erreur écriture DB:', error.message);
         return false;
     }
 }
 
-// Logger une action admin
-async function logAction(action, details, admin = 'Admin') {
-    const db = await readDatabase();
-    const logEntry = {
-        id: uuidv4(),
-        timestamp: new Date().toISOString(),
-        action,
-        details,
-        admin
-    };
-    db.logs.push(logEntry);
-    await writeDatabase(db);
+// ==================== CONFIGURATION DE SÉCURITÉ ====================
+
+// CODE ADMIN SÉCURISÉ (stocké côté serveur, PAS VISIBLE EN CLIENT)
+const ADMIN_CODE = 'L1_TRIANGLE';
+
+// Sessions actives (en mémoire - considérez une vraie base pour production)
+const activeSessions = new Map();
+
+// Middleware pour vérifier l'authentification
+function verifyAuth(req, res, next) {
+    const sessionId = req.headers['x-session-id'] || req.body?.sessionId;
+    
+    if (!sessionId || !activeSessions.has(sessionId)) {
+        return res.status(401).json({ error: 'Non authentifié' });
+    }
+    
+    req.sessionId = sessionId;
+    next();
 }
 
 // ==================== ROUTE HEALTH CHECK ====================
@@ -137,55 +148,119 @@ app.get('/api/health', (req, res) => {
     });
 });
 
+// ==================== AUTHENTIFICATION ADMIN ====================
+
+// Endpoint LOGIN - Vérifie le code et crée une session
+app.post('/api/admin/login', (req, res) => {
+    const { code } = req.body;
+    
+    if (!code) {
+        console.log('❌ Tentative login sans code');
+        return res.status(400).json({ error: 'Code requis' });
+    }
+    
+    if (code !== ADMIN_CODE) {
+        console.log('❌ Tentative login avec mauvais code');
+        return res.status(401).json({ error: 'Code invalide' });
+    }
+    
+    // Créer une session unique
+    const sessionId = uuidv4();
+    activeSessions.set(sessionId, {
+        createdAt: new Date(),
+        expiresAt: new Date(Date.now() + 24 * 60 * 60 * 1000) // 24h
+    });
+    
+    console.log('✅ Admin authentifié - Session créée');
+    res.json({ 
+        success: true, 
+        sessionId,
+        message: '✅ Authentification réussie'
+    });
+});
+
+// Endpoint LOGOUT - Invalide la session
+app.post('/api/admin/logout', verifyAuth, (req, res) => {
+    activeSessions.delete(req.sessionId);
+    console.log('✅ Session fermée');
+    res.json({ success: true, message: 'Déconnecté' });
+});
+
+// Endpoint CHECK SESSION - Vérifie si la session est valide
+app.get('/api/admin/check', (req, res) => {
+    const sessionId = req.headers['x-session-id'];
+    
+    if (!sessionId || !activeSessions.has(sessionId)) {
+        return res.json({ authenticated: false });
+    }
+    
+    const session = activeSessions.get(sessionId);
+    
+    // Vérifier expiration
+    if (new Date() > session.expiresAt) {
+        activeSessions.delete(sessionId);
+        return res.json({ authenticated: false });
+    }
+    
+    res.json({ authenticated: true });
+});
+
 // ==================== ROUTES PRODUITS ====================
 
 // Obtenir tous les produits
-app.get('/api/products', async (req, res) => {
+app.get('/api/products', (req, res) => {
     try {
-        const db = await readDatabase();
+        const db = readDatabase();
         console.log(`✅ ${db.products.length} produits retournés`);
         res.json(db.products);
     } catch (error) {
-        console.error('❌ Erreur GET /api/products:', error);
+        console.error('❌ Erreur GET /api/products:', error.message);
         res.status(500).json({ error: 'Erreur serveur' });
     }
 });
 
 // Obtenir un produit par ID
-app.get('/api/products/:id', async (req, res) => {
-    const db = await readDatabase();
-    const product = db.products.find(p => p.id === req.params.id);
-    if (product) {
-        res.json(product);
-    } else {
-        res.status(404).json({ error: 'Produit non trouvé' });
+app.get('/api/products/:id', (req, res) => {
+    try {
+        const db = readDatabase();
+        const product = db.products.find(p => p.id === req.params.id);
+        if (product) {
+            res.json(product);
+        } else {
+            res.status(404).json({ error: 'Produit non trouvé' });
+        }
+    } catch (error) {
+        res.status(500).json({ error: 'Erreur serveur' });
     }
 });
 
-// Créer un nouveau produit
-app.post('/api/products', async (req, res) => {
+// Créer un nouveau produit (PROTÉGÉ - Admin seulement)
+app.post('/api/products', verifyAuth, (req, res) => {
     try {
-        const db = await readDatabase();
+        const db = readDatabase();
         const newProduct = {
             id: uuidv4(),
             ...req.body,
             createdAt: new Date().toISOString()
         };
         db.products.push(newProduct);
-        await writeDatabase(db);
-        await logAction('AJOUT_PRODUIT', `Produit ajouté: ${newProduct.name}`);
-        console.log(`✅ Produit créé: ${newProduct.id}`);
+        
+        if (!writeDatabase(db)) {
+            throw new Error('Erreur sauvegarde DB');
+        }
+        
+        console.log(`✅ Produit créé: ${newProduct.name}`);
         res.status(201).json(newProduct);
     } catch (error) {
-        console.error('❌ Erreur POST /api/products:', error);
-        res.status(500).json({ error: 'Erreur serveur' });
+        console.error('❌ Erreur POST /api/products:', error.message);
+        res.status(500).json({ error: 'Erreur serveur: ' + error.message });
     }
 });
 
-// Modifier un produit
-app.put('/api/products/:id', async (req, res) => {
+// Modifier un produit (PROTÉGÉ - Admin seulement)
+app.put('/api/products/:id', verifyAuth, (req, res) => {
     try {
-        const db = await readDatabase();
+        const db = readDatabase();
         const index = db.products.findIndex(p => p.id === req.params.id);
         
         if (index !== -1) {
@@ -195,36 +270,42 @@ app.put('/api/products/:id', async (req, res) => {
                 updatedAt: new Date().toISOString()
             };
             db.products[index] = updatedProduct;
-            await writeDatabase(db);
-            await logAction('MODIFICATION_PRODUIT', `Produit modifié: ${updatedProduct.name}`);
-            console.log(`✅ Produit modifié: ${req.params.id}`);
+            
+            if (!writeDatabase(db)) {
+                throw new Error('Erreur sauvegarde DB');
+            }
+            
+            console.log(`✅ Produit modifié: ${updatedProduct.name}`);
             res.json(updatedProduct);
         } else {
             res.status(404).json({ error: 'Produit non trouvé' });
         }
     } catch (error) {
-        console.error('❌ Erreur PUT /api/products:', error);
+        console.error('❌ Erreur PUT /api/products:', error.message);
         res.status(500).json({ error: 'Erreur serveur' });
     }
 });
 
-// Supprimer un produit
-app.delete('/api/products/:id', async (req, res) => {
+// Supprimer un produit (PROTÉGÉ - Admin seulement)
+app.delete('/api/products/:id', verifyAuth, (req, res) => {
     try {
-        const db = await readDatabase();
+        const db = readDatabase();
         const product = db.products.find(p => p.id === req.params.id);
         
         if (product) {
             db.products = db.products.filter(p => p.id !== req.params.id);
-            await writeDatabase(db);
-            await logAction('SUPPRESSION_PRODUIT', `Produit supprimé: ${product.name}`);
-            console.log(`✅ Produit supprimé: ${req.params.id}`);
-            res.json({ message: 'Produit supprimé' });
+            
+            if (!writeDatabase(db)) {
+                throw new Error('Erreur sauvegarde DB');
+            }
+            
+            console.log(`✅ Produit supprimé: ${product.name}`);
+            res.json({ message: 'Produit supprimé', deleted: product });
         } else {
             res.status(404).json({ error: 'Produit non trouvé' });
         }
     } catch (error) {
-        console.error('❌ Erreur DELETE /api/products:', error);
+        console.error('❌ Erreur DELETE /api/products:', error.message);
         res.status(500).json({ error: 'Erreur serveur' });
     }
 });
@@ -232,65 +313,75 @@ app.delete('/api/products/:id', async (req, res) => {
 // ==================== ROUTES COMMANDES ====================
 
 // Obtenir toutes les commandes
-app.get('/api/orders', async (req, res) => {
+app.get('/api/orders', (req, res) => {
     try {
-        const db = await readDatabase();
+        const db = readDatabase();
         console.log(`✅ ${db.orders.length} commandes retournées`);
         res.json(db.orders);
     } catch (error) {
-        console.error('❌ Erreur GET /api/orders:', error);
+        console.error('❌ Erreur GET /api/orders:', error.message);
         res.status(500).json({ error: 'Erreur serveur' });
     }
 });
 
 // Obtenir une commande par ID
-app.get('/api/orders/:id', async (req, res) => {
-    const db = await readDatabase();
-    const order = db.orders.find(o => o.id === req.params.id);
-    if (order) {
-        res.json(order);
-    } else {
-        res.status(404).json({ error: 'Commande non trouvée' });
+app.get('/api/orders/:id', (req, res) => {
+    try {
+        const db = readDatabase();
+        const order = db.orders.find(o => o.id === req.params.id);
+        if (order) {
+            res.json(order);
+        } else {
+            res.status(404).json({ error: 'Commande non trouvée' });
+        }
+    } catch (error) {
+        res.status(500).json({ error: 'Erreur serveur' });
     }
 });
 
 // Créer une nouvelle commande
-app.post('/api/orders', async (req, res) => {
+app.post('/api/orders', (req, res) => {
     try {
-        const db = await readDatabase();
+        const db = readDatabase();
         const newOrder = {
             id: uuidv4(),
             ...req.body,
             date: new Date().toISOString()
         };
         db.orders.push(newOrder);
-        await writeDatabase(db);
-        await logAction('NOUVELLE_COMMANDE', `Commande de ${newOrder.customerName} - ${newOrder.total}`, 'Système');
+        
+        if (!writeDatabase(db)) {
+            throw new Error('Erreur sauvegarde DB');
+        }
+        
         console.log(`✅ Commande créée: ${newOrder.id}`);
         res.status(201).json(newOrder);
     } catch (error) {
-        console.error('❌ Erreur POST /api/orders:', error);
+        console.error('❌ Erreur POST /api/orders:', error.message);
         res.status(500).json({ error: 'Erreur serveur' });
     }
 });
 
 // Supprimer une commande
-app.delete('/api/orders/:id', async (req, res) => {
+app.delete('/api/orders/:id', (req, res) => {
     try {
-        const db = await readDatabase();
+        const db = readDatabase();
         const order = db.orders.find(o => o.id === req.params.id);
         
         if (order) {
             db.orders = db.orders.filter(o => o.id !== req.params.id);
-            await writeDatabase(db);
-            await logAction('SUPPRESSION_COMMANDE', `Commande supprimée: ${order.id}`);
+            
+            if (!writeDatabase(db)) {
+                throw new Error('Erreur sauvegarde DB');
+            }
+            
             console.log(`✅ Commande supprimée: ${req.params.id}`);
             res.json({ message: 'Commande supprimée' });
         } else {
             res.status(404).json({ error: 'Commande non trouvée' });
         }
     } catch (error) {
-        console.error('❌ Erreur DELETE /api/orders:', error);
+        console.error('❌ Erreur DELETE /api/orders:', error.message);
         res.status(500).json({ error: 'Erreur serveur' });
     }
 });
@@ -298,31 +389,50 @@ app.delete('/api/orders/:id', async (req, res) => {
 // ==================== ROUTES LOGS ====================
 
 // Obtenir tous les logs
-app.get('/api/logs', async (req, res) => {
-    const db = await readDatabase();
-    res.json(db.logs);
+app.get('/api/logs', (req, res) => {
+    try {
+        const db = readDatabase();
+        res.json(db.logs);
+    } catch (error) {
+        console.error('❌ Erreur GET /api/logs:', error.message);
+        res.status(500).json({ error: 'Erreur serveur' });
+    }
 });
 
 // Effacer tous les logs
-app.delete('/api/logs', async (req, res) => {
-    const db = await readDatabase();
-    db.logs = [];
-    await writeDatabase(db);
-    res.json({ message: 'Historique effacé' });
+app.delete('/api/logs', (req, res) => {
+    try {
+        const db = readDatabase();
+        db.logs = [];
+        
+        if (!writeDatabase(db)) {
+            throw new Error('Erreur sauvegarde DB');
+        }
+        
+        res.json({ message: 'Historique effacé' });
+    } catch (error) {
+        console.error('❌ Erreur DELETE /api/logs:', error.message);
+        res.status(500).json({ error: 'Erreur serveur' });
+    }
 });
 
 // ==================== ROUTE STATS ====================
 
 // Obtenir les statistiques
-app.get('/api/stats', async (req, res) => {
-    const db = await readDatabase();
-    const stats = {
-        totalProducts: db.products.length,
-        totalOrders: db.orders.length,
-        totalRevenue: db.orders.reduce((sum, order) => sum + (order.total || 0), 0),
-        totalLogs: db.logs.length
-    };
-    res.json(stats);
+app.get('/api/stats', (req, res) => {
+    try {
+        const db = readDatabase();
+        const stats = {
+            totalProducts: db.products.length,
+            totalOrders: db.orders.length,
+            totalRevenue: db.orders.reduce((sum, order) => sum + (order.total || 0), 0),
+            totalLogs: db.logs.length
+        };
+        res.json(stats);
+    } catch (error) {
+        console.error('❌ Erreur GET /api/stats:', error.message);
+        res.status(500).json({ error: 'Erreur serveur' });
+    }
 });
 
 // Gestion des erreurs (DOIT être avant app.listen)
@@ -334,7 +444,8 @@ app.use((err, req, res, next) => {
 // ==================== DÉMARRAGE DU SERVEUR ====================
 
 console.log('🔄 Initialisation de la base de données...');
-initDatabase().then(() => {
+try {
+    initDatabase();
     console.log('✅ Base de données initialisée');
     const localIP = getLocalIPAddress();
     console.log(`📡 IP locale détectée: ${localIP}`);
@@ -371,9 +482,9 @@ initDatabase().then(() => {
 📱 URL à partager: http://${localIP}:${PORT}
         `);
     });
-}).catch((err) => {
-    console.error('❌ Erreur lors de l\'initialisation:', err);
+} catch (err) {
+    console.error('❌ Erreur lors de l\'initialisation:', err.message);
     process.exit(1);
-});
+}
 
 module.exports = app;

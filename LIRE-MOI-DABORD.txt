@@ -1,0 +1,105 @@
+═══════════════════════════════════════════════════════════════════
+              🚀 L1TRIANGLE - GUIDE D'ACCÈS COMPLET
+═══════════════════════════════════════════════════════════════════
+
+⚠️⚠️⚠️ ATTENTION - LISEZ CECI EN PREMIER! ⚠️⚠️⚠️
+
+VOUS NE DEVEZ JAMAIS ouvrir les fichiers HTML directement 
+depuis le dossier (C:/admin-login.html, etc.)
+
+Ça ne marchera JAMAIS! ❌
+
+
+✅✅✅ LA BONNE MÉTHODE ✅✅✅
+
+1️⃣ DÉMARREZ LE SERVEUR:
+   Double-cliquez sur: DEMARRER-ADMIN.bat
+   
+   OU tapez dans PowerShell:
+   node api-server.js
+
+
+2️⃣ ATTENDEZ 3 SECONDES que le serveur démarre
+
+
+3️⃣ UTILISEZ CES URLS DANS VOTRE NAVIGATEUR:
+
+   🏠 Accueil:
+   http://localhost:3000/start.html
+
+   🔐 Connexion Admin:
+   http://localhost:3000/admin.html
+   
+   🛍️ Boutique:
+   http://localhost:3000/index.html
+
+
+═══════════════════════════════════════════════════════════════════
+                        📱 MÉTHODE FACILE
+═══════════════════════════════════════════════════════════════════
+
+Double-cliquez sur:  START-HERE.html
+(Ce fichier vous montrera si le serveur est en ligne et 
+vous permettra d'accéder facilement à toutes les pages)
+
+
+═══════════════════════════════════════════════════════════════════
+                    🔑 CODE ADMIN: L1_TRIANGLE
+═══════════════════════════════════════════════════════════════════
+
+
+═══════════════════════════════════════════════════════════════════
+                    🌐 ACCÈS DEPUIS UN AUTRE APPAREIL
+═══════════════════════════════════════════════════════════════════
+
+Remplacez "localhost" par l'adresse IP de votre PC:
+
+Exemple: http://192.168.1.100:3000/admin.html
+
+Pour trouver votre IP:
+- Ouvrez PowerShell
+- Tapez: ipconfig
+- Cherchez "Adresse IPv4"
+
+
+═══════════════════════════════════════════════════════════════════
+                        ❌ ERREURS COURANTES
+═══════════════════════════════════════════════════════════════════
+
+❌ "File not found" → Vous n'avez PAS démarré le serveur!
+   Solution: Double-cliquez sur DEMARRER-ADMIN.bat
+
+❌ "Unable to connect" → Le serveur n'est pas démarré!
+   Solution: Lancez "node api-server.js" dans PowerShell
+
+❌ Page blanche → Vous avez ouvert le fichier directement (C:/)
+   Solution: Utilisez http://localhost:3000/...
+
+
+═══════════════════════════════════════════════════════════════════
+                    📂 FICHIERS IMPORTANTS
+═══════════════════════════════════════════════════════════════════
+
+✅ DEMARRER-ADMIN.bat     → Lance le serveur ET ouvre l'admin
+✅ START-HERE.html         → Page de démarrage visuelle
+✅ OUVRIR-ICI.html         → Instructions si vous vous trompez
+✅ LIRE-MOI-DABORD.txt     → Ce fichier
+✅ api-server.js           → Le serveur (ne pas modifier)
+✅ database.json           → Base de données (sauvegarde auto)
+
+
+═══════════════════════════════════════════════════════════════════
+                    💡 CONSEILS
+═══════════════════════════════════════════════════════════════════
+
+1. Ajoutez http://localhost:3000/admin.html à vos favoris!
+
+2. Ne fermez JAMAIS la fenêtre PowerShell pendant que vous 
+   utilisez le site (ça éteint le serveur)
+
+3. Pour arrêter le serveur: Ctrl+C dans PowerShell
+
+
+═══════════════════════════════════════════════════════════════════
+              TOUT EST PRÊT! SUIVEZ LES ÉTAPES CI-DESSUS
+═══════════════════════════════════════════════════════════════════

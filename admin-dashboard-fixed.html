@@ -1,0 +1,588 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>L1TRIANGLE - Admin Dashboard</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { 
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            background: linear-gradient(135deg, #0f1419 0%, #1a1f2e 100%);
+            color: #e8e8e8;
+            display: flex;
+            min-height: 100vh;
+        }
+        .admin-container { display: flex; width: 100%; height: 100vh; }
+        .sidebar { 
+            width: 260px; 
+            background: linear-gradient(180deg, rgba(20, 25, 40, 0.98) 0%, rgba(15, 20, 35, 0.98) 100%); 
+            border-right: 1px solid rgba(255, 107, 61, 0.15); 
+            padding: 25px 18px; 
+            display: flex; 
+            flex-direction: column; 
+            gap: 25px; 
+        }
+        .sidebar h2 { 
+            font-size: 22px; 
+            color: #ff6b3d; 
+            margin-bottom: 8px; 
+            letter-spacing: 1.5px; 
+        }
+        .sidebar-menu { 
+            display: flex; 
+            flex-direction: column; 
+            gap: 8px; 
+            flex: 1; 
+        }
+        .menu-item { 
+            padding: 11px 14px; 
+            background: rgba(255, 107, 61, 0.08); 
+            border: 1.5px solid rgba(255, 107, 61, 0.15); 
+            color: rgba(255, 177, 151, 0.85); 
+            border-radius: 8px; 
+            cursor: pointer; 
+            font-size: 13px; 
+            font-weight: 500; 
+            transition: all 0.25s;
+            text-align: left;
+        }
+        .menu-item:hover { 
+            background: rgba(255, 107, 61, 0.12); 
+            border-color: rgba(255, 107, 61, 0.35); 
+            color: #ffb197; 
+        }
+        .menu-item.active { 
+            background: linear-gradient(135deg, rgba(255, 107, 61, 0.25), rgba(255, 107, 61, 0.12)); 
+            border-color: #ff6b3d; 
+            color: #ff9966; 
+            box-shadow: inset 0 0 12px rgba(255, 107, 61, 0.15); 
+        }
+        .logout-btn { 
+            padding: 10px 14px; 
+            background: linear-gradient(135deg, rgba(255, 107, 61, 0.15), rgba(255, 107, 61, 0.08)); 
+            border: 1.5px solid rgba(255, 107, 61, 0.3); 
+            color: #ff9966; 
+            border-radius: 8px; 
+            cursor: pointer; 
+            font-weight: 600; 
+            font-size: 13px; 
+            transition: all 0.3s;
+            width: 100%;
+        }
+        .logout-btn:hover { 
+            background: linear-gradient(135deg, #ff6b3d, rgba(255, 107, 61, 0.7)); 
+            border-color: #ff6b3d; 
+            color: #fff; 
+        }
+        .main-content { 
+            flex: 1; 
+            overflow-y: auto; 
+            padding: 35px 40px; 
+            background: linear-gradient(135deg, rgba(5, 6, 8, 0.5) 0%, rgba(15, 25, 40, 0.5) 100%); 
+        }
+        .content-header h1 { 
+            font-size: 28px; 
+            color: #ff6b3d; 
+            margin-bottom: 8px; 
+            font-weight: 600; 
+        }
+        .content-header p { 
+            color: rgba(255, 177, 151, 0.65); 
+            font-size: 13px; 
+        }
+        .section { 
+            display: none; 
+            animation: fadeIn 0.3s ease-out; 
+        }
+        .section.active { 
+            display: block; 
+        }
+        @keyframes fadeIn { 
+            from { opacity: 0; } 
+            to { opacity: 1; } 
+        }
+        .section-card { 
+            background: linear-gradient(135deg, rgba(30, 40, 60, 0.6), rgba(20, 30, 50, 0.4)); 
+            border: 1px solid rgba(255, 107, 61, 0.12); 
+            border-radius: 12px; 
+            padding: 28px; 
+            margin-bottom: 24px; 
+        }
+        h2 { 
+            font-size: 18px; 
+            color: #ff9966; 
+            margin-bottom: 18px; 
+            font-weight: 600; 
+            border-bottom: 1px solid rgba(255, 107, 61, 0.1); 
+            padding-bottom: 12px; 
+        }
+        h3 { 
+            font-size: 15px; 
+            color: #ffb197; 
+            margin: 18px 0 14px 0; 
+            font-weight: 600; 
+        }
+        .form-group { 
+            margin-bottom: 16px; 
+        }
+        label { 
+            display: block; 
+            margin-bottom: 6px; 
+            font-weight: 600; 
+            color: #ffb197; 
+            font-size: 12px; 
+            text-transform: uppercase; 
+            letter-spacing: 0.5px; 
+        }
+        input, textarea, select { 
+            width: 100%; 
+            padding: 10px 12px; 
+            border: 1px solid rgba(255, 107, 61, 0.2); 
+            background: rgba(255, 255, 255, 0.04); 
+            color: #e8e8e8; 
+            border-radius: 6px; 
+            font-size: 13px; 
+            font-family: inherit; 
+        }
+        input:focus, textarea:focus, select:focus { 
+            outline: none; 
+            border-color: rgba(255, 107, 61, 0.6); 
+            background: rgba(255, 107, 61, 0.08); 
+        }
+        textarea { 
+            resize: vertical; 
+            min-height: 90px; 
+        }
+        .form-row { 
+            display: grid; 
+            grid-template-columns: 1fr 1fr; 
+            gap: 16px; 
+        }
+        button { 
+            padding: 10px 20px; 
+            background: linear-gradient(135deg, #ff6b3d, rgba(255, 107, 61, 0.8)); 
+            border: none; 
+            color: #fff; 
+            border-radius: 6px; 
+            cursor: pointer; 
+            font-weight: 600; 
+            transition: all 0.3s; 
+            font-size: 13px; 
+        }
+        button:hover { 
+            transform: translateY(-2px); 
+        }
+        .btn-danger { 
+            background: linear-gradient(135deg, rgba(255, 50, 50, 0.7), rgba(255, 100, 100, 0.5)); 
+        }
+        table { 
+            width: 100%; 
+            border-collapse: collapse; 
+        }
+        table th { 
+            background: rgba(255, 107, 61, 0.1); 
+            padding: 12px 14px; 
+            color: #ff9966; 
+            font-weight: 600; 
+            border-bottom: 1.5px solid rgba(255, 107, 61, 0.15); 
+            font-size: 12px; 
+            text-align: left;
+        }
+        table td { 
+            padding: 11px 14px; 
+            border-bottom: 1px solid rgba(255, 107, 61, 0.08); 
+            color: rgba(232, 232, 232, 0.9); 
+            font-size: 13px; 
+        }
+        table tr:hover { 
+            background: rgba(255, 107, 61, 0.06); 
+        }
+        .loading { 
+            color: #ff6b3d; 
+            font-weight: 600; 
+            font-size: 13px; 
+        }
+        .error { 
+            color: #ff6b6b;
+            padding: 12px;
+            background: rgba(255, 50, 50, 0.1);
+            border: 1px solid rgba(255, 50, 50, 0.2);
+            border-radius: 6px;
+            margin-bottom: 12px;
+        }
+        .image-preview {
+            width: 150px;
+            height: 150px;
+            background: rgba(255, 107, 61, 0.1);
+            border: 2px dashed rgba(255, 107, 61, 0.3);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-top: 10px;
+            overflow: hidden;
+        }
+        .image-preview img {
+            max-width: 100%;
+            max-height: 100%;
+            object-fit: cover;
+        }
+        .file-input-wrapper {
+            position: relative;
+            overflow: hidden;
+            display: inline-block;
+            width: 100%;
+        }
+        .file-input-wrapper input[type=file] {
+            position: absolute;
+            left: -9999px;
+        }
+        .file-input-label {
+            display: block;
+            padding: 10px 12px;
+            background: rgba(100, 150, 200, 0.15);
+            border: 1px solid rgba(100, 150, 200, 0.3);
+            color: #8bb4ff;
+            border-radius: 6px;
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-align: center;
+        }
+        .file-input-label:hover {
+            background: rgba(100, 150, 200, 0.25);
+            border-color: rgba(100, 150, 200, 0.5);
+        }
+    </style>
+</head>
+<body>
+    <div class="admin-container">
+        <aside class="sidebar">
+            <div>
+                <h2>▲ L1 TRIANGLE</h2>
+                <p style="font-size: 12px; color: rgba(255, 177, 151, 0.7);">Admin Dashboard</p>
+                <div style="display: inline-block; background: rgba(100, 200, 100, 0.15); border: 1px solid rgba(100, 200, 100, 0.3); color: #8bff8b; padding: 6px 10px; border-radius: 4px; font-size: 11px; margin-top: 8px;">🔐 Sécurisé</div>
+            </div>
+
+            <nav class="sidebar-menu">
+                <button class="menu-item active" onclick="switchTab('products', this)">🛍️ PRODUITS</button>
+                <button class="menu-item" onclick="switchTab('orders', this)">📦 COMMANDES</button>
+                <button class="menu-item" onclick="switchTab('logs', this)">📋 LOGS</button>
+            </nav>
+
+            <a href="/index.html" style="display: block; padding: 10px 14px; background: rgba(100, 150, 200, 0.15); border: 1.5px solid rgba(100, 150, 200, 0.3); color: #8bb4ff; border-radius: 8px; text-decoration: none; font-weight: 600; font-size: 13px; text-align: center; cursor: pointer; transition: all 0.3s; margin-bottom: 10px;">🏪 RETOUR BOUTIQUE</a>
+
+            <button class="logout-btn" onclick="logout()">🚪 DÉCONNEXION</button>
+        </aside>
+
+        <main class="main-content">
+            <div class="content-header" style="margin-bottom: 32px;">
+                <h1>📊 DASHBOARD ADMIN</h1>
+                <p>Espace d'administration sécurisé L1TRIANGLE</p>
+            </div>
+
+            <div id="products" class="section active"></div>
+            <div id="orders" class="section"></div>
+            <div id="logs" class="section"></div>
+        </main>
+    </div>
+
+    <script>
+        const API_BASE = window.location.origin + '/api';
+        
+        function checkAuth() {
+            const sessionId = sessionStorage.getItem('admin_sessionId');
+            if (!sessionId) {
+                window.location.href = '/admin-login-v2.html';
+                return false;
+            }
+            return sessionId;
+        }
+
+        function logout() {
+            sessionStorage.removeItem('admin_sessionId');
+            window.location.href = '/admin-login-v2.html';
+        }
+
+        async function apiCall(endpoint, method = 'GET', body = null) {
+            const sessionId = checkAuth();
+            if (!sessionId) return null;
+
+            try {
+                const options = {
+                    method,
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-Session-Id': sessionId
+                    },
+                    mode: 'cors'
+                };
+
+                if (body) options.body = JSON.stringify(body);
+
+                const response = await fetch(API_BASE + endpoint, options);
+
+                if (response.status === 401) {
+                    sessionStorage.removeItem('admin_sessionId');
+                    window.location.href = '/admin-login-v2.html';
+                    return null;
+                }
+
+                if (!response.ok) throw new Error(`HTTP ${response.status}`);
+                return await response.json();
+            } catch (error) {
+                console.error('❌ API Error:', error);
+                throw error;
+            }
+        }
+
+        function switchTab(tabName, element) {
+            document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+            document.querySelectorAll('.menu-item').forEach(m => m.classList.remove('active'));
+            
+            document.getElementById(tabName).classList.add('active');
+            element.classList.add('active');
+
+            if (tabName === 'products') loadProducts();
+            else if (tabName === 'orders') loadOrders();
+            else if (tabName === 'logs') loadLogs();
+        }
+
+        async function loadProducts() {
+            const el = document.getElementById('products');
+            el.innerHTML = '<div class="section-card"><p class="loading">⏳ Chargement...</p></div>';
+
+            try {
+                const products = await apiCall('/products');
+                
+                let html = `
+                    <div class="section-card">
+                        <h2>🛍️ GESTION DES PRODUITS</h2>
+                        <h3>➕ AJOUTER UN PRODUIT</h3>
+                        <form onsubmit="handleAddProduct(event)" id="productForm">
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label>Nom *</label>
+                                    <input type="text" name="name" required>
+                                </div>
+                                <div class="form-group">
+                                    <label>Catégorie *</label>
+                                    <select name="category" required>
+                                        <option>manettes</option>
+                                        <option>accessoires</option>
+                                        <option>moniteurs</option>
+                                        <option>airpods</option>
+                                        <option>cables</option>
+                                        <option>vape</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label>Prix ($) *</label>
+                                    <input type="number" name="price" step="0.01" required>
+                                </div>
+                                <div class="form-group">
+                                    <label>Stock *</label>
+                                    <input type="number" name="stock" required>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label>Description</label>
+                                <textarea name="description"></textarea>
+                            </div>
+                            <div class="form-group">
+                                <label>Image du produit</label>
+                                <div class="file-input-wrapper">
+                                    <input type="file" id="imageInput" name="image" accept="image/*" onchange="previewImage(event)">
+                                    <label for="imageInput" class="file-input-label">📸 Choisir une image</label>
+                                </div>
+                                <div id="imagePreview" class="image-preview" style="display: none;">
+                                    <img id="previewImg" src="" alt="Aperçu">
+                                </div>
+                                <input type="hidden" id="imageBase64" name="imageBase64" value="">
+                            </div>
+                            <button type="submit" style="width: 100%;">AJOUTER PRODUIT</button>
+                        </form>
+                    </div>
+
+                    <div class="section-card">
+                        <h3>📋 PRODUITS (${products.length})</h3>
+                `;
+
+                if (products.length === 0) {
+                    html += '<p style="color: rgba(255, 177, 151, 0.6);">Aucun produit. Ajoutez-en un!</p>';
+                } else {
+                    html += '<table><thead><tr><th>Image</th><th>Nom</th><th>Catégorie</th><th>Prix</th><th>Stock</th><th>Action</th></tr></thead><tbody>';
+                    
+                    products.forEach(p => {
+                        const imgSrc = p.image && p.image.startsWith('data:') ? p.image : (p.image || 'https://via.placeholder.com/50x50?text=No+Img');
+                        html += `<tr>
+                            <td><img src="${imgSrc}" style="width: 50px; height: 50px; border-radius: 4px; object-fit: cover;" alt="${p.name}"></td>
+                            <td>${p.name}</td>
+                            <td>${p.category}</td>
+                            <td>$${p.price}</td>
+                            <td>${p.stock}</td>
+                            <td><button class="btn-danger" onclick="deleteProduct('${p.id}')" style="padding: 6px 12px; font-size: 12px;">Supprimer</button></td>
+                        </tr>`;
+                    });
+
+                    html += '</tbody></table>';
+                }
+
+                html += '</div>';
+                el.innerHTML = html;
+            } catch (error) {
+                el.innerHTML = `<div class="section-card"><div class="error">❌ ${error.message}</div></div>`;
+            }
+        }
+
+        async function handleAddProduct(e) {
+            e.preventDefault();
+            const form = e.target;
+            const data = new FormData(form);
+
+            try {
+                const imageBase64 = document.getElementById('imageBase64').value;
+
+                const product = {
+                    name: data.get('name'),
+                    category: data.get('category'),
+                    price: parseFloat(data.get('price')),
+                    stock: parseInt(data.get('stock')),
+                    description: data.get('description'),
+                    image: imageBase64 || 'https://via.placeholder.com/300x200?text=' + encodeURIComponent(data.get('name'))
+                };
+
+                await apiCall('/products', 'POST', product);
+                alert('✅ Produit ajouté!');
+                form.reset();
+                document.getElementById('imagePreview').style.display = 'none';
+                loadProducts();
+            } catch (error) {
+                alert('❌ ' + error.message);
+            }
+        }
+
+        function previewImage(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                const base64 = e.target.result;
+                document.getElementById('imageBase64').value = base64;
+                
+                const preview = document.getElementById('imagePreview');
+                const img = document.getElementById('previewImg');
+                img.src = base64;
+                preview.style.display = 'flex';
+            };
+            reader.readAsDataURL(file);
+        }
+
+        async function deleteProduct(id) {
+            if (!confirm('Êtes-vous sûr de vouloir supprimer ce produit?')) return;
+
+            try {
+                await apiCall('/products/' + id, 'DELETE');
+                alert('✅ Produit supprimé!');
+                loadProducts();
+            } catch (error) {
+                alert('❌ ' + error.message);
+            }
+        }
+
+        async function loadOrders() {
+            const el = document.getElementById('orders');
+            el.innerHTML = '<div class="section-card"><p class="loading">⏳ Chargement...</p></div>';
+
+            try {
+                const orders = await apiCall('/orders');
+                
+                let html = '<div class="section-card"><h2>📦 COMMANDES</h2>';
+
+                if (orders.length === 0) {
+                    html += '<p style="color: rgba(255, 177, 151, 0.6);">Aucune commande.</p>';
+                } else {
+                    html += `<table>
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Client</th>
+                                <th>Total</th>
+                                <th>Date</th>
+                            </tr>
+                        </thead>
+                        <tbody>`;
+
+                    orders.forEach(o => {
+                        html += `<tr>
+                            <td>${o.id.substring(0, 8)}</td>
+                            <td>${o.customerName || 'Anonyme'}</td>
+                            <td style="color: #6bff6b;">$${o.total?.toFixed(2) || '0'}</td>
+                            <td>${new Date(o.date).toLocaleDateString()}</td>
+                        </tr>`;
+                    });
+
+                    html += '</tbody></table>';
+                }
+
+                html += '</div>';
+                el.innerHTML = html;
+            } catch (error) {
+                el.innerHTML = `<div class="section-card"><div class="error">❌ ${error.message}</div></div>`;
+            }
+        }
+
+        async function loadLogs() {
+            const el = document.getElementById('logs');
+            el.innerHTML = '<div class="section-card"><p class="loading">⏳ Chargement...</p></div>';
+
+            try {
+                const logs = await apiCall('/logs');
+                
+                let html = '<div class="section-card"><h2>📋 LOGS SYSTÈME</h2>';
+
+                if (logs.length === 0) {
+                    html += '<p style="color: rgba(255, 177, 151, 0.6);">Aucun log.</p>';
+                } else {
+                    html += `<table>
+                        <thead>
+                            <tr>
+                                <th>Type</th>
+                                <th>Message</th>
+                                <th>Date</th>
+                            </tr>
+                        </thead>
+                        <tbody>`;
+
+                    logs.forEach(l => {
+                        const color = l.type === 'ERROR' ? '#ff6b6b' : '#6bff6b';
+                        html += `<tr>
+                            <td style="color: ${color};">${l.type}</td>
+                            <td>${l.message}</td>
+                            <td>${new Date(l.date).toLocaleString()}</td>
+                        </tr>`;
+                    });
+
+                    html += '</tbody></table>';
+                }
+
+                html += '</div>';
+                el.innerHTML = html;
+            } catch (error) {
+                el.innerHTML = `<div class="section-card"><div class="error">❌ ${error.message}</div></div>`;
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            if (checkAuth()) {
+                loadProducts();
+            }
+        });
+    </script>
+</body>
+</html>

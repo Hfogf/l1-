@@ -382,7 +382,7 @@ whatsappBtn.addEventListener('click', async () => {
     
     message += `%0A*TOTAL: $${total.toFixed(2)}*`;
     
-    const whatsappLink = `https://wa.me/50939945994?text=${message}`;
+    const whatsappLink = `https://wa.me/50939945794?text=${message}`;
     window.open(whatsappLink, '_blank');
     
     // Vider le panier

@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🚀 L1TRIANGLE - Démarrage Rapide</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #0f1419 0%, #1a1f2e 100%);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 20px;
+        }
+        .container {
+            max-width: 800px;
+            width: 100%;
+        }
+        .header {
+            text-align: center;
+            margin-bottom: 50px;
+            color: white;
+        }
+        .header h1 {
+            font-size: 48px;
+            color: #ff6b3d;
+            margin-bottom: 10px;
+            text-shadow: 0 0 20px rgba(255, 107, 61, 0.5);
+        }
+        .header p {
+            color: rgba(255, 177, 151, 0.8);
+            font-size: 18px;
+        }
+        .cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 25px;
+            margin-bottom: 40px;
+        }
+        .card {
+            background: linear-gradient(135deg, rgba(20, 25, 40, 0.95) 0%, rgba(15, 20, 35, 0.95) 100%);
+            border: 2px solid rgba(255, 107, 61, 0.3);
+            border-radius: 16px;
+            padding: 30px;
+            text-align: center;
+            transition: all 0.3s;
+            cursor: pointer;
+            text-decoration: none;
+            display: block;
+            position: relative;
+            overflow: hidden;
+        }
+        .card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, rgba(255, 107, 61, 0.1), transparent);
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+        .card:hover::before {
+            opacity: 1;
+        }
+        .card:hover {
+            transform: translateY(-5px);
+            border-color: #ff6b3d;
+            box-shadow: 0 10px 30px rgba(255, 107, 61, 0.3);
+        }
+        .card-icon {
+            font-size: 60px;
+            margin-bottom: 15px;
+        }
+        .card h2 {
+            color: #ff6b3d;
+            font-size: 24px;
+            margin-bottom: 10px;
+        }
+        .card p {
+            color: rgba(255, 177, 151, 0.7);
+            font-size: 14px;
+            line-height: 1.6;
+        }
+        .card .url {
+            background: rgba(255, 107, 61, 0.1);
+            padding: 8px 12px;
+            border-radius: 6px;
+            margin-top: 15px;
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+            color: #ff9966;
+            word-break: break-all;
+        }
+        .status-bar {
+            background: rgba(20, 25, 40, 0.95);
+            border: 2px solid rgba(255, 107, 61, 0.3);
+            border-radius: 12px;
+            padding: 20px;
+            text-align: center;
+            color: white;
+        }
+        .status-bar .status {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 16px;
+            font-weight: 600;
+        }
+        .status .dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: #4caf50;
+            animation: pulse 2s infinite;
+        }
+        .status .dot.offline {
+            background: #e74c3c;
+            animation: none;
+        }
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+        .instructions {
+            background: rgba(255, 193, 7, 0.1);
+            border-left: 4px solid #ffc107;
+            padding: 20px;
+            border-radius: 8px;
+            margin-top: 30px;
+            color: #ffc107;
+        }
+        .instructions h3 {
+            margin-bottom: 10px;
+        }
+        .instructions ol {
+            margin-left: 20px;
+            color: rgba(255, 255, 255, 0.8);
+        }
+        .instructions li {
+            margin: 8px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🚀 L1TRIANGLE</h1>
+            <p>Choisissez où vous voulez aller</p>
+        </div>
+
+        <div class="cards">
+            <a href="http://localhost:3000/start.html" class="card" id="card-home">
+                <div class="card-icon">🏠</div>
+                <h2>Accueil</h2>
+                <p>Page d'accueil du site avec présentation</p>
+                <div class="url">localhost:3000/start.html</div>
+            </a>
+
+            <a href="http://localhost:3000/admin.html" class="card" id="card-admin">
+                <div class="card-icon">🔐</div>
+                <h2>Admin</h2>
+                <p>Connexion à l'espace administration</p>
+                <div class="url">localhost:3000/admin.html</div>
+            </a>
+
+            <a href="http://localhost:3000/index.html" class="card" id="card-shop">
+                <div class="card-icon">🛍️</div>
+                <h2>Boutique</h2>
+                <p>Voir et acheter les produits</p>
+                <div class="url">localhost:3000/index.html</div>
+            </a>
+        </div>
+
+        <div class="status-bar">
+            <div class="status" id="server-status">
+                <div class="dot" id="status-dot"></div>
+                <span id="status-text">Vérification du serveur...</span>
+            </div>
+        </div>
+
+        <div class="instructions">
+            <h3>⚠️ Le serveur n'est pas démarré?</h3>
+            <ol>
+                <li>Double-cliquez sur <strong>DEMARRER-ADMIN.bat</strong></li>
+                <li>OU ouvrez PowerShell et tapez: <code>node api-server.js</code></li>
+                <li>Attendez 3 secondes que le serveur démarre</li>
+                <li>Rafraîchissez cette page (F5)</li>
+            </ol>
+        </div>
+    </div>
+
+    <script>
+        // Vérifier si le serveur est en ligne
+        function checkServer() {
+            fetch('http://localhost:3000/api/products')
+                .then(response => {
+                    if (response.ok) {
+                        document.getElementById('status-dot').classList.remove('offline');
+                        document.getElementById('status-text').textContent = '✅ Serveur en ligne - Cliquez sur une carte!';
+                        
+                        // Activer les liens
+                        document.querySelectorAll('.card').forEach(card => {
+                            card.style.pointerEvents = 'auto';
+                            card.style.opacity = '1';
+                        });
+                    } else {
+                        throw new Error('Server not responding');
+                    }
+                })
+                .catch(() => {
+                    document.getElementById('status-dot').classList.add('offline');
+                    document.getElementById('status-text').textContent = '❌ Serveur éteint - Démarrez-le d\'abord!';
+                    
+                    // Désactiver les liens
+                    document.querySelectorAll('.card').forEach(card => {
+                        card.style.pointerEvents = 'none';
+                        card.style.opacity = '0.5';
+                        card.onclick = (e) => {
+                            e.preventDefault();
+                            alert('❌ Le serveur n\'est pas démarré!\n\nDouble-cliquez sur DEMARRER-ADMIN.bat');
+                        };
+                    });
+                });
+        }
+
+        // Vérifier toutes les 3 secondes
+        checkServer();
+        setInterval(checkServer, 3000);
+
+        // Copier URL au clic droit
+        document.querySelectorAll('.card').forEach(card => {
+            card.addEventListener('contextmenu', (e) => {
+                e.preventDefault();
+                const url = card.href;
+                navigator.clipboard.writeText(url).then(() => {
+                    alert('✅ URL copiée: ' + url);
+                });
+            });
+        });
+    </script>
+</body>
+</html>

@@ -2,11 +2,18 @@
 
 class APIClient {
     constructor() {
+        // Toujours essayer localhost en premier
         this.baseUrls = [
-            'http://172.29.192.1:3000/api',
             'http://localhost:3000/api',
+            'http://172.29.192.1:3000/api',
             'http://10.115.107.126:3000/api'
         ];
+        
+        // Filtrer pour local dev seulement
+        if (window.location.hostname !== 'localhost' && window.location.hostname !== '127.0.0.1') {
+            console.log('🌐 Mode distant - essayer localhost en priorité');
+        }
+        
         this.timeout = 15000;
         this.retries = 5;
         this.currentIndex = 0;
@@ -342,4 +349,37 @@ function showError(message) {
 document.addEventListener('DOMContentLoaded', () => {
     console.log('🎯 Page chargée, initialisation');
     loadProducts();
+    
+    // Gérer l'ouverture/fermeture du panier
+    const openCartBtn = document.getElementById('open-cart');
+    const closeCartBtn = document.getElementById('close-cart');
+    const cartOverlay = document.getElementById('cart-overlay');
+    
+    if (openCartBtn) {
+        openCartBtn.addEventListener('click', () => {
+            if (cartOverlay) {
+                cartOverlay.classList.remove('hidden');
+                console.log('🛒 Panier ouvert');
+            }
+        });
+    }
+    
+    if (closeCartBtn) {
+        closeCartBtn.addEventListener('click', () => {
+            if (cartOverlay) {
+                cartOverlay.classList.add('hidden');
+                console.log('✕ Panier fermé');
+            }
+        });
+    }
+    
+    // Fermer le panier en cliquant sur l'overlay
+    if (cartOverlay) {
+        cartOverlay.addEventListener('click', (e) => {
+            if (e.target === cartOverlay) {
+                cartOverlay.classList.add('hidden');
+                console.log('✕ Panier fermé (click overlay)');
+            }
+        });
+    }
 });

@@ -4,13 +4,103 @@
     <meta charset="UTF-8">
     <title>Admin - L1triangle_store</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: Arial, sans-serif; background: #f5f5f5; }
+        
+        .login-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+        
+        .login-box {
+            background: white;
+            padding: 40px;
+            border-radius: 10px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.3);
+            max-width: 400px;
+            width: 90%;
+        }
+        
+        .login-box h1 {
+            text-align: center;
+            color: #333;
+            margin-bottom: 30px;
+        }
+        
+        .form-group {
+            margin-bottom: 15px;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+            color: #333;
+        }
+        
+        .form-group input {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #ddd;
+            border-radius: 5px;
+            font-size: 16px;
+        }
+        
+        .form-group input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+        
+        button {
+            width: 100%;
+            padding: 12px;
+            background: #667eea;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            margin-top: 10px;
+        }
+        
+        button:hover {
+            background: #5568d3;
+        }
+        
+        .error {
+            color: #f00;
+            background: #fee;
+            padding: 10px;
+            border-radius: 3px;
+            margin-bottom: 15px;
+            display: none;
+        }
+    </style>
 </head>
-<body style="margin: 0; padding: 0; font-family: Arial, sans-serif;">
-    <!-- Charge la config API d'abord -->
+<body>
+    <div class="login-container">
+        <div class="login-box">
+            <h1>🔐 Admin L1Triangle</h1>
+            <div class="error" id="error"></div>
+            <form onsubmit="handleLogin(event)">
+                <div class="form-group">
+                    <label>Code d'accès :</label>
+                    <input type="password" id="code" required autofocus>
+                </div>
+                <button type="submit">Se connecter</button>
+            </form>
+            <p style="text-align: center; margin-top: 20px; color: #666; font-size: 14px;">
+                Code: <strong>L1_TRIANGLE</strong>
+            </p>
+        </div>
+    </div>
+
     <script src="config.js"></script>
-    <!-- Charge le client API robuste -->
-    <script src="panier-api-v2.js"></script>
-    <!-- Charge le dashboard admin -->
     <script src="admin-dashboard-v2.js"></script>
 </body>
 </html>
