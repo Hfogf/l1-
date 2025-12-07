@@ -357,6 +357,11 @@
             try {
                 const products = await apiCall('/products');
                 
+                // Vérification de sécurité
+                if (!products || !Array.isArray(products)) {
+                    throw new Error('Erreur: Impossible de charger les produits');
+                }
+                
                 let html = `
                     <div class="section-card">
                         <h2>🛍️ GESTION DES PRODUITS</h2>
@@ -502,6 +507,11 @@
             try {
                 const orders = await apiCall('/orders');
                 
+                // Vérification de sécurité
+                if (!orders || !Array.isArray(orders)) {
+                    throw new Error('Erreur: Impossible de charger les commandes');
+                }
+                
                 let html = '<div class="section-card"><h2>📦 COMMANDES</h2>';
 
                 if (orders.length === 0) {
@@ -543,6 +553,11 @@
 
             try {
                 const logs = await apiCall('/logs');
+                
+                // Vérification de sécurité
+                if (!logs || !Array.isArray(logs)) {
+                    throw new Error('Erreur: Impossible de charger les logs');
+                }
                 
                 let html = '<div class="section-card"><h2>📋 LOGS SYSTÈME</h2>';
 
